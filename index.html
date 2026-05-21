@@ -506,7 +506,7 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
           <div class="mode-section active" id="vmode-text">
             <div class="control-group">
               <label class="ctrl-label">Watermark Text</label>
-              <input type="text" id="vWmText" value="© Protected">
+              <input type="text" id="vWmText" value="alysthiaMLBB">
             </div>
             <div class="control-group">
               <label class="ctrl-label">Font Size</label>
@@ -567,6 +567,8 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
             <label class="ctrl-label">Margin</label>
             <div class="range-row"><input type="range" id="vMargin" min="0" max="100" value="20"><span class="range-val" id="vMarginVal">20px</span></div>
           </div>
+          <div class="divider"></div>
+          <label class="check-row"><input type="checkbox" id="vChkBlend" checked><span>Blend mode hardening (overlay)</span></label>
         </div>
       </div>
 
@@ -595,7 +597,7 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
         <div class="panel video-panel">
           <div class="panel-title video-title">Export Videos</div>
           <div class="info-box-video">
-            ⚠ Video export encodes each frame with the watermark using the MediaRecorder API. Processing time depends on video length and browser. Output format: WebM.
+            ⚠ Video export encodes each frame with the watermark using the MediaRecorder API. Processing time depends on video length and browser. Output: MP4 (or WebM fallback if browser doesn't support MP4 recording).
           </div>
           <div class="progress-wrap" id="videoProgressWrap">
             <div class="progress-track"><div class="progress-fill video-fill" id="videoProgressFill"></div></div>
@@ -610,7 +612,7 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
           </div>
           <button class="btn btn-danger" id="resetVideoBtn" style="display:none;margin-top:0.5rem">✕ Reset Videos</button>
           <div style="margin-top:0.8rem;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted2);line-height:1.6">
-            All processing is local. Output is WebM (H.264-like via VP8). For best results use short clips under 2 min.
+            All processing is local. Output is MP4 where supported, WebM as fallback. For best results use short clips under 2 min.
           </div>
         </div>
       </div>
@@ -667,8 +669,8 @@ function showStatus(msg, dur=2500) {
 function getSettings() {
   return {
     mode: currentMode,
-    wmText: document.getElementById('wmText').value||'© Protected',
-    wmTextBoth: document.getElementById('wmTextBoth').value||'© Protected',
+    wmText: document.getElementById('wmText').value||'alysthiaMLBB',
+    wmTextBoth: document.getElementById('wmTextBoth').value||'alysthiaMLBB',
     fontSize: +document.getElementById('fontSize').value,
     textColor: document.getElementById('textColor').value,
     fontStyle: document.getElementById('fontStyle').value,
@@ -1009,7 +1011,7 @@ function showVideoStatus(msg, dur=3000) {
 function getVideoSettings() {
   return {
     mode: currentVideoMode,
-    wmText: document.getElementById('vWmText').value || '© Protected',
+    wmText: document.getElementById('vWmText').value || 'alysthiaMLBB',
     fontSize: +document.getElementById('vFontSize').value,
     textColor: document.getElementById('vTextColor').value,
     fontStyle: document.getElementById('vFontStyle').value,
@@ -1019,14 +1021,17 @@ function getVideoSettings() {
     opacity: +document.getElementById('vOpacity').value / 100,
     rotation: +document.getElementById('vRotation').value * Math.PI / 180,
     margin: +document.getElementById('vMargin').value,
+    chkBlend: document.getElementById('vChkBlend').checked,
   };
 }
 
 function drawVideoWatermark(ctx, W, H, s) {
   ctx.clearRect(0, 0, W, H);
+  const blendOp = s.chkBlend ? 'overlay' : 'source-over';
   if (s.mode === 'text') {
     const rgb = hexToRgb(s.textColor);
     ctx.save();
+    ctx.globalCompositeOperation = blendOp;
     ctx.globalAlpha = s.opacity;
     ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},1)`;
     ctx.font = `${s.fontStyle} ${s.fontSize}px "${s.fontFamily}"`;
@@ -1054,7 +1059,9 @@ function drawVideoWatermark(ctx, W, H, s) {
     ctx.restore();
   } else if (s.mode === 'image' && vWmLogoImg) {
     const wmW = W * s.wmSize, wmH = vWmLogoImg.height * (wmW / vWmLogoImg.width);
-    ctx.save(); ctx.globalAlpha = s.opacity;
+    ctx.save();
+    ctx.globalCompositeOperation = blendOp;
+    ctx.globalAlpha = s.opacity;
     if (s.position === 'tile') {
       const gx = wmW * 1.5, gy = wmH * 2.2;
       for (let ty = -gy; ty < H + gy; ty += gy)
@@ -1201,11 +1208,17 @@ async function processVideo(item, onProgress) {
     } catch(e) { /* audio not available */ }
 
     const chunks = [];
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    const mp4Type = 'video/mp4;codecs=avc1';
+    const mimeType = MediaRecorder.isTypeSupported(mp4Type) ? mp4Type
+                   : MediaRecorder.isTypeSupported('video/mp4') ? 'video/mp4'
+                   : MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+                   : 'video/webm';
+    const isMP4 = mimeType.startsWith('video/mp4');
     const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
     recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' });
+      const blob = new Blob(chunks, { type: mimeType });
+      blob._ext = isMP4 ? 'mp4' : 'webm';
       resolve(blob);
     };
 
@@ -1297,7 +1310,7 @@ document.getElementById('dlCurrentVideoBtn').addEventListener('click', () => {
   if (!item?.resultBlob) { showVideoStatus('Process video first'); return; }
   const url = URL.createObjectURL(item.resultBlob);
   const a = document.createElement('a'); a.href = url;
-  a.download = 'watershield-' + item.name.replace(/\.[^.]+$/, '') + '.webm'; a.click();
+  a.download = 'watershield-' + item.name.replace(/\.[^.]+$/, '') + '.' + (item.resultBlob._ext || 'mp4'); a.click();
   URL.revokeObjectURL(url);
 });
 
@@ -1307,7 +1320,7 @@ document.getElementById('dlAllVideosBtn').addEventListener('click', async () => 
   showVideoStatus('Creating ZIP...', 0);
   const zip = new JSZip();
   doneItems.forEach((item, i) => {
-    zip.file(`watershield-${i+1}-${item.name.replace(/\.[^.]+$/, '')}.webm`, item.resultBlob);
+    zip.file(`watershield-${i+1}-${item.name.replace(/\.[^.]+$/, '')}.${item.resultBlob._ext || 'mp4'}`, item.resultBlob);
   });
   const blob = await zip.generateAsync({ type: 'blob' });
   const url = URL.createObjectURL(blob);
