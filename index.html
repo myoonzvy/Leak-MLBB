@@ -57,6 +57,30 @@ h1 {
 }
 .sub { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted2); margin-top: 0.5rem; letter-spacing: 0.05em; }
 
+/* Mode switcher tabs (Image / Video) */
+.media-mode-switcher {
+  display: flex; justify-content: center; gap: 0; margin-bottom: 2rem;
+  background: #0a0a14; border: 1px solid var(--border); border-radius: 10px;
+  padding: 4px; max-width: 320px; margin-left: auto; margin-right: auto;
+}
+.media-mode-btn {
+  flex: 1; padding: 0.6rem 1.2rem; border: none; border-radius: 7px;
+  font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.08em;
+  cursor: pointer; background: transparent; color: var(--muted2);
+  font-weight: 700; text-transform: uppercase; transition: all 0.2s;
+}
+.media-mode-btn.active {
+  background: var(--accent); color: #000;
+  box-shadow: 0 0 18px rgba(0,255,170,0.3);
+}
+.media-mode-btn.video-active {
+  background: var(--accent3); color: #fff;
+  box-shadow: 0 0 18px rgba(123,47,255,0.4);
+}
+
+.media-section { display: none; }
+.media-section.active { display: block; }
+
 .layout { display: grid; grid-template-columns: 290px 1fr; gap: 1.2rem; align-items: start; }
 @media(max-width:720px){ .layout { grid-template-columns: 1fr; } }
 
@@ -69,11 +93,15 @@ h1 {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
   background: linear-gradient(90deg, transparent, rgba(0,255,170,0.35), transparent);
 }
+.panel.video-panel::after {
+  background: linear-gradient(90deg, transparent, rgba(123,47,255,0.5), transparent);
+}
 .panel-title {
   font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.3em;
   color: var(--accent); text-transform: uppercase; margin-bottom: 1.1rem;
   display: flex; align-items: center; gap: 0.5rem;
 }
+.panel-title.video-title { color: var(--accent3); }
 .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 .batch-dropzone {
@@ -83,6 +111,9 @@ h1 {
 }
 .batch-dropzone:hover, .batch-dropzone.drag-over {
   border-color: var(--accent); background: rgba(0,255,170,0.04);
+}
+.batch-dropzone.video-dz:hover, .batch-dropzone.video-dz.drag-over {
+  border-color: var(--accent3); background: rgba(123,47,255,0.04);
 }
 .batch-dropzone input { display: none; }
 .dz-icon { font-size: 2.2rem; margin-bottom: 0.6rem; }
@@ -120,6 +151,29 @@ h1 {
 }
 .queue-item.done .status-dot { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 .queue-item.processing .status-dot { background: #ffd700; animation: pulse 0.8s infinite; }
+
+/* Video queue items */
+.video-queue-item {
+  position: relative; border-radius: 7px; overflow: hidden;
+  border: 2px solid rgba(123,47,255,0.3); cursor: pointer;
+  transition: border-color 0.15s; padding: 0.6rem; background: #0d0d1c;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.video-queue-item:hover { border-color: var(--accent3); }
+.video-queue-item.selected-preview { border-color: var(--accent3); box-shadow: 0 0 8px rgba(123,47,255,0.3); }
+.video-queue-item.done { border-color: rgba(0,255,170,0.5); }
+.video-queue-item.processing { border-color: #ffd700; }
+.video-queue-list { display: flex; flex-direction: column; gap: 5px; max-height: 280px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.vq-icon { font-size: 1.4rem; flex-shrink: 0; }
+.vq-info { flex: 1; min-width: 0; }
+.vq-name { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vq-meta { font-family: 'Space Mono', monospace; font-size: 0.56rem; color: var(--muted2); margin-top: 2px; }
+.vq-status { font-family: 'Space Mono', monospace; font-size: 0.55rem; margin-top: 2px; }
+.vq-status.done { color: var(--accent); }
+.vq-status.processing { color: #ffd700; }
+.vq-status.ready { color: var(--muted2); }
+.vq-remove { background: none; border: none; color: var(--accent2); font-size: 0.75rem; cursor: pointer; padding: 0 0 0 0.2rem; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+.video-queue-item:hover .vq-remove { opacity: 1; }
 
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
@@ -184,6 +238,18 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
 .preview-placeholder .icon { font-size: 2.5rem; opacity: 0.25; margin-bottom: 0.8rem; }
 #previewCanvas { max-width: 100%; max-height: 420px; object-fit: contain; border-radius: 6px; display: none; }
 
+/* Video preview */
+.video-preview-wrap { background: #0a0a14; border: 1px solid rgba(123,47,255,0.25); border-radius: 10px; display: flex; align-items: center; justify-content: center; min-height: 320px; overflow: hidden; margin-bottom: 1rem; position: relative; }
+#videoPreview { max-width: 100%; max-height: 420px; border-radius: 6px; display: none; }
+#videoPreviewPlaceholder { text-align: center; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+#videoOverlayCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; border-radius: 6px; display: none; }
+.video-preview-label {
+  font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--accent3);
+  text-align: center; margin-bottom: 0.5rem;
+  background: rgba(123,47,255,0.08); border: 1px solid rgba(123,47,255,0.2);
+  border-radius: 6px; padding: 0.35rem;
+}
+
 .preview-nav { display: none; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
 .preview-nav.show { display: flex; }
 .nav-btn { background: var(--panel2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 0.35rem 0.6rem; cursor: pointer; transition: all 0.15s; }
@@ -194,23 +260,33 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
 .progress-wrap { display: none; margin-bottom: 0.8rem; }
 .progress-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+.progress-fill.video-fill { background: var(--accent3); }
 .progress-text { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted2); margin-top: 0.4rem; text-align: center; }
 
 .btn { width: 100%; padding: 0.72rem; border: none; border-radius: 8px; cursor: pointer; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; font-weight: 700; text-transform: uppercase; transition: all 0.2s; margin-bottom: 0.5rem; }
 .btn-primary { background: var(--accent); color: #000; box-shadow: 0 0 20px rgba(0,255,170,0.15); }
 .btn-primary:hover:not(:disabled) { box-shadow: 0 0 32px rgba(0,255,170,0.45); transform: translateY(-1px); }
 .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-video { background: var(--accent3); color: #fff; box-shadow: 0 0 20px rgba(123,47,255,0.2); }
+.btn-video:hover:not(:disabled) { box-shadow: 0 0 32px rgba(123,47,255,0.5); transform: translateY(-1px); }
+.btn-video:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-secondary { background: transparent; color: var(--accent); border: 1px solid rgba(0,255,170,0.4); }
 .btn-secondary:hover:not(:disabled) { background: rgba(0,255,170,0.07); }
 .btn-secondary:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-secondary-v { background: transparent; color: var(--accent3); border: 1px solid rgba(123,47,255,0.4); }
+.btn-secondary-v:hover:not(:disabled) { background: rgba(123,47,255,0.07); }
+.btn-secondary-v:disabled { opacity: 0.3; cursor: not-allowed; }
 .btn-danger { background: transparent; color: var(--accent2); border: 1px solid rgba(255,60,172,0.3); }
 .btn-danger:hover { background: rgba(255,60,172,0.07); }
 
 .info-box { background: rgba(123,47,255,0.1); border: 1px solid rgba(123,47,255,0.25); border-radius: 7px; padding: 0.6rem 0.8rem; font-family: 'Space Mono', monospace; font-size: 0.63rem; color: #a882ff; line-height: 1.55; margin-bottom: 0.8rem; }
+.info-box-video { background: rgba(123,47,255,0.08); border: 1px solid rgba(123,47,255,0.2); border-radius: 7px; padding: 0.6rem 0.8rem; font-family: 'Space Mono', monospace; font-size: 0.63rem; color: #b899ff; line-height: 1.55; margin-bottom: 0.8rem; }
 .divider { height: 1px; background: var(--border); margin: 0.8rem 0; }
 
 #status { font-family: 'Space Mono', monospace; font-size: 0.63rem; color: var(--accent); text-align: center; min-height: 1em; opacity: 0; transition: opacity 0.3s; margin-bottom: 0.4rem; }
 #status.vis { opacity: 1; }
+#videoStatus { font-family: 'Space Mono', monospace; font-size: 0.63rem; color: var(--accent3); text-align: center; min-height: 1em; opacity: 0; transition: opacity 0.3s; margin-bottom: 0.4rem; }
+#videoStatus.vis { opacity: 1; }
 
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -221,169 +297,321 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
   <header>
     <div class="logo-badge">⬡ WATERSHIELD BATCH</div>
     <h1>Batch Watermark</h1>
-    <p class="sub">// upload unlimited images · watermark all at once · download as ZIP</p>
+    <p class="sub">// images &amp; videos · watermark all at once · download as ZIP</p>
   </header>
 
-  <div class="layout">
-    <!-- Controls -->
-    <div>
-      <div class="panel">
-        <div class="panel-title">01 — Upload Images</div>
-        <div class="batch-dropzone" id="batchDrop">
-          <div class="dz-icon">📁</div>
-          <div class="dz-main">Drop images here</div>
-          <div class="dz-sub">click to select · any number of files</div>
-          <input type="file" id="batchInput" accept="image/*" multiple>
-        </div>
-        <div id="queueSection">
-          <div class="queue-header">
-            <span class="queue-count" id="queueCount">0 images</span>
-            <button class="queue-clear" id="clearQueue">clear all</button>
-          </div>
-          <div class="queue-grid" id="queueGrid"></div>
-        </div>
-      </div>
+  <!-- Media Mode Switcher -->
+  <div class="media-mode-switcher">
+    <button class="media-mode-btn active" id="switchImage" onclick="switchMediaMode('image')">🖼 Images</button>
+    <button class="media-mode-btn" id="switchVideo" onclick="switchMediaMode('video')">🎬 Videos</button>
+  </div>
 
-      <div class="panel">
-        <div class="panel-title">02 — Watermark Type</div>
-        <div class="tabs">
-          <div class="tab active" data-tab="text">TEXT</div>
-          <div class="tab" data-tab="image">IMAGE</div>
-          <div class="tab" data-tab="both">BOTH</div>
+  <!-- ======================== IMAGE SECTION ======================== -->
+  <div class="media-section active" id="section-image">
+    <div class="layout">
+      <!-- Controls -->
+      <div>
+        <div class="panel">
+          <div class="panel-title">01 — Upload Images</div>
+          <div class="batch-dropzone" id="batchDrop">
+            <div class="dz-icon">📁</div>
+            <div class="dz-main">Drop images here</div>
+            <div class="dz-sub">click to select · any number of files</div>
+            <input type="file" id="batchInput" accept="image/*" multiple>
+          </div>
+          <div id="queueSection">
+            <div class="queue-header">
+              <span class="queue-count" id="queueCount">0 images</span>
+              <button class="queue-clear" id="clearQueue">clear all</button>
+            </div>
+            <div class="queue-grid" id="queueGrid"></div>
+          </div>
         </div>
 
-        <div class="mode-section active" id="mode-text">
-          <div class="control-group">
-            <label class="ctrl-label">Watermark Text</label>
-            <input type="text" id="wmText" value="alysthiaMLBB">
+        <div class="panel">
+          <div class="panel-title">02 — Watermark Type</div>
+          <div class="tabs">
+            <div class="tab active" data-tab="text">TEXT</div>
+            <div class="tab" data-tab="image">IMAGE</div>
+            <div class="tab" data-tab="both">BOTH</div>
           </div>
-          <div class="control-group">
-            <label class="ctrl-label">Font Size</label>
-            <div class="range-row"><input type="range" id="fontSize" min="10" max="140" value="38"><span class="range-val" id="fontSizeVal">38</span></div>
-          </div>
-          <div class="control-group">
-            <label class="ctrl-label">Color</label>
-            <div class="color-row"><input type="color" id="textColor" value="#ffffff"><input type="text" id="textColorHex" value="#ffffff"></div>
-            <div class="swatches">
-              <div class="swatch sel" style="background:#fff" data-c="#ffffff"></div>
-              <div class="swatch" style="background:#000" data-c="#000000"></div>
-              <div class="swatch" style="background:#ff3cac" data-c="#ff3cac"></div>
-              <div class="swatch" style="background:#00ffaa" data-c="#00ffaa"></div>
-              <div class="swatch" style="background:#ffd700" data-c="#ffd700"></div>
-              <div class="swatch" style="background:#ff4444" data-c="#ff4444"></div>
-              <div class="swatch" style="background:#4488ff" data-c="#4488ff"></div>
+
+          <div class="mode-section active" id="mode-text">
+            <div class="control-group">
+              <label class="ctrl-label">Watermark Text</label>
+              <input type="text" id="wmText" value="alysthiaMLBB">
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Font Size</label>
+              <div class="range-row"><input type="range" id="fontSize" min="10" max="140" value="38"><span class="range-val" id="fontSizeVal">38</span></div>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Color</label>
+              <div class="color-row"><input type="color" id="textColor" value="#ffffff"><input type="text" id="textColorHex" value="#ffffff"></div>
+              <div class="swatches">
+                <div class="swatch sel" style="background:#fff" data-c="#ffffff"></div>
+                <div class="swatch" style="background:#000" data-c="#000000"></div>
+                <div class="swatch" style="background:#ff3cac" data-c="#ff3cac"></div>
+                <div class="swatch" style="background:#00ffaa" data-c="#00ffaa"></div>
+                <div class="swatch" style="background:#ffd700" data-c="#ffd700"></div>
+                <div class="swatch" style="background:#ff4444" data-c="#ff4444"></div>
+                <div class="swatch" style="background:#4488ff" data-c="#4488ff"></div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Style</label>
+              <select id="fontStyle"><option value="bold">Bold</option><option value="italic bold">Bold Italic</option><option value="normal">Normal</option><option value="italic">Italic</option></select>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Font</label>
+              <select id="fontFamily"><option>Arial</option><option>Georgia</option><option>Courier New</option><option>Impact</option><option>Times New Roman</option><option>Verdana</option></select>
             </div>
           </div>
-          <div class="control-group">
-            <label class="ctrl-label">Style</label>
-            <select id="fontStyle"><option value="bold">Bold</option><option value="italic bold">Bold Italic</option><option value="normal">Normal</option><option value="italic">Italic</option></select>
+
+          <div class="mode-section" id="mode-image">
+            <div class="wm-dropzone" id="wmDrop">
+              <div>🏷 Drop logo / watermark image</div>
+              <div style="margin-top:0.3rem;font-size:0.6rem">PNG with transparency works best</div>
+              <input type="file" id="wmInput" accept="image/*">
+            </div>
+            <img id="wmThumb" class="wm-thumb" style="display:none">
+            <div class="control-group" style="margin-top:0.9rem">
+              <label class="ctrl-label">Logo Size</label>
+              <div class="range-row"><input type="range" id="wmSize" min="3" max="80" value="22"><span class="range-val" id="wmSizeVal">22%</span></div>
+            </div>
           </div>
-          <div class="control-group">
-            <label class="ctrl-label">Font</label>
-            <select id="fontFamily"><option>Arial</option><option>Georgia</option><option>Courier New</option><option>Impact</option><option>Times New Roman</option><option>Verdana</option></select>
+
+          <div class="mode-section" id="mode-both">
+            <div class="control-group">
+              <label class="ctrl-label">Text</label>
+              <input type="text" id="wmTextBoth" value="© MyBrand">
+            </div>
+            <div class="wm-dropzone" id="wmDropBoth">
+              <div>🔗 Drop logo image</div>
+              <input type="file" id="wmInputBoth" accept="image/*">
+            </div>
+            <img id="wmThumbBoth" class="wm-thumb" style="display:none">
+            <div class="control-group" style="margin-top:0.9rem">
+              <label class="ctrl-label">Logo Size</label>
+              <div class="range-row"><input type="range" id="wmSizeBoth" min="3" max="60" value="18"><span class="range-val" id="wmSizeBothVal">18%</span></div>
+            </div>
           </div>
         </div>
 
-        <div class="mode-section" id="mode-image">
-          <div class="wm-dropzone" id="wmDrop">
-            <div>🏷 Drop logo / watermark image</div>
-            <div style="margin-top:0.3rem;font-size:0.6rem">PNG with transparency works best</div>
-            <input type="file" id="wmInput" accept="image/*">
+        <div class="panel">
+          <div class="panel-title">03 — Placement</div>
+          <div class="control-group">
+            <label class="ctrl-label">Position</label>
+            <select id="position"><option value="bottom-right">Bottom Right</option><option value="bottom-left">Bottom Left</option><option value="top-right">Top Right</option><option value="top-left">Top Left</option><option value="center">Center</option><option value="tile">Tile (full coverage)</option></select>
           </div>
-          <img id="wmThumb" class="wm-thumb" style="display:none">
-          <div class="control-group" style="margin-top:0.9rem">
-            <label class="ctrl-label">Logo Size</label>
-            <div class="range-row"><input type="range" id="wmSize" min="3" max="80" value="22"><span class="range-val" id="wmSizeVal">22%</span></div>
+          <div class="control-group">
+            <label class="ctrl-label">Opacity</label>
+            <div class="range-row"><input type="range" id="opacity" min="5" max="100" value="30"><span class="range-val" id="opacityVal">30%</span></div>
+          </div>
+          <div class="control-group">
+            <label class="ctrl-label">Rotation</label>
+            <div class="range-row"><input type="range" id="rotation" min="-180" max="180" value="-30"><span class="range-val" id="rotationVal">-30°</span></div>
+          </div>
+          <div class="control-group">
+            <label class="ctrl-label">Margin</label>
+            <div class="range-row"><input type="range" id="margin" min="0" max="100" value="20"><span class="range-val" id="marginVal">20px</span></div>
           </div>
         </div>
 
-        <div class="mode-section" id="mode-both">
+        <div class="panel">
+          <div class="panel-title">04 — AI Resistance</div>
+          <div class="info-box">Embeds watermark at multiple pixel frequencies — hard to remove with inpainting, cropping, or AI tools.</div>
+          <label class="check-row"><input type="checkbox" id="chkFreq" checked><span>Multi-layer frequency embed</span></label>
+          <label class="check-row"><input type="checkbox" id="chkNoise" checked><span>Pixel noise injection</span></label>
+          <label class="check-row"><input type="checkbox" id="chkBlend" checked><span>Blend mode hardening</span></label>
+          <label class="check-row"><input type="checkbox" id="chkMeta" checked><span>Steganographic pixel layer</span></label>
+          <div class="divider"></div>
           <div class="control-group">
-            <label class="ctrl-label">Text</label>
-            <input type="text" id="wmTextBoth" value="© MyBrand">
-          </div>
-          <div class="wm-dropzone" id="wmDropBoth">
-            <div>🔗 Drop logo image</div>
-            <input type="file" id="wmInputBoth" accept="image/*">
-          </div>
-          <img id="wmThumbBoth" class="wm-thumb" style="display:none">
-          <div class="control-group" style="margin-top:0.9rem">
-            <label class="ctrl-label">Logo Size</label>
-            <div class="range-row"><input type="range" id="wmSizeBoth" min="3" max="60" value="18"><span class="range-val" id="wmSizeBothVal">18%</span></div>
+            <label class="ctrl-label">Resistance Level</label>
+            <select id="resistanceLevel"><option value="medium">Medium</option><option value="high" selected>High (recommended)</option><option value="max">Maximum</option></select>
           </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title">03 — Placement</div>
-        <div class="control-group">
-          <label class="ctrl-label">Position</label>
-          <select id="position"><option value="bottom-right">Bottom Right</option><option value="bottom-left">Bottom Left</option><option value="top-right">Top Right</option><option value="top-left">Top Left</option><option value="center">Center</option><option value="tile">Tile (full coverage)</option></select>
+      <!-- Preview + Export -->
+      <div>
+        <div class="panel">
+          <div class="panel-title">Preview</div>
+          <div class="preview-nav" id="previewNav">
+            <div style="display:flex;gap:0.4rem">
+              <button class="nav-btn" id="prevBtn">◀ Prev</button>
+              <button class="nav-btn" id="nextBtn">Next ▶</button>
+            </div>
+            <span class="preview-label" id="previewLabel">Image 1 of 0</span>
+          </div>
+          <div class="preview-wrap">
+            <div class="preview-placeholder" id="previewPlaceholder">
+              <div class="icon">🛡</div>
+              <div>Add images to begin</div>
+            </div>
+            <canvas id="previewCanvas"></canvas>
+          </div>
         </div>
-        <div class="control-group">
-          <label class="ctrl-label">Opacity</label>
-          <div class="range-row"><input type="range" id="opacity" min="5" max="100" value="30"><span class="range-val" id="opacityVal">30%</span></div>
-        </div>
-        <div class="control-group">
-          <label class="ctrl-label">Rotation</label>
-          <div class="range-row"><input type="range" id="rotation" min="-180" max="180" value="-30"><span class="range-val" id="rotationVal">-30°</span></div>
-        </div>
-        <div class="control-group">
-          <label class="ctrl-label">Margin</label>
-          <div class="range-row"><input type="range" id="margin" min="0" max="100" value="20"><span class="range-val" id="marginVal">20px</span></div>
-        </div>
-      </div>
 
-      <div class="panel">
-        <div class="panel-title">04 — AI Resistance</div>
-        <div class="info-box">Embeds watermark at multiple pixel frequencies — hard to remove with inpainting, cropping, or AI tools.</div>
-        <label class="check-row"><input type="checkbox" id="chkFreq" checked><span>Multi-layer frequency embed</span></label>
-        <label class="check-row"><input type="checkbox" id="chkNoise" checked><span>Pixel noise injection</span></label>
-        <label class="check-row"><input type="checkbox" id="chkBlend" checked><span>Blend mode hardening</span></label>
-        <label class="check-row"><input type="checkbox" id="chkMeta" checked><span>Steganographic pixel layer</span></label>
-        <div class="divider"></div>
-        <div class="control-group">
-          <label class="ctrl-label">Resistance Level</label>
-          <select id="resistanceLevel"><option value="medium">Medium</option><option value="high" selected>High (recommended)</option><option value="max">Maximum</option></select>
+        <div class="panel">
+          <div class="panel-title">Batch Export</div>
+          <div class="progress-wrap" id="progressWrap">
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Processing...</div>
+          </div>
+          <div id="status"></div>
+          <button class="btn btn-primary" id="applyAllBtn" disabled>⚡ Apply Watermark to All Images</button>
+          <div id="dlAllWrap" style="display:none">
+            <button class="btn btn-secondary" id="dlAllBtn">⬇ Download All as ZIP</button>
+            <button class="btn btn-secondary" id="dlCurrentBtn">⬇ Download Current Image</button>
+          </div>
+          <button class="btn btn-danger" id="resetBtn" style="display:none">✕ Reset Everything</button>
+          <div style="margin-top:0.8rem;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted2);line-height:1.6">
+            All processing happens locally — no uploads to any server. Output saved as PNG.
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Preview + Export -->
-    <div>
-      <div class="panel">
-        <div class="panel-title">Preview</div>
-        <div class="preview-nav" id="previewNav">
-          <div style="display:flex;gap:0.4rem">
-            <button class="nav-btn" id="prevBtn">◀ Prev</button>
-            <button class="nav-btn" id="nextBtn">Next ▶</button>
+  <!-- ======================== VIDEO SECTION ======================== -->
+  <div class="media-section" id="section-video">
+    <div class="layout">
+      <!-- Video Controls -->
+      <div>
+        <div class="panel video-panel">
+          <div class="panel-title video-title">01 — Upload Videos</div>
+          <div class="batch-dropzone video-dz" id="videoDrop">
+            <div class="dz-icon">🎬</div>
+            <div class="dz-main">Drop videos here</div>
+            <div class="dz-sub">click to select · MP4, WebM, MOV</div>
+            <input type="file" id="videoInput" accept="video/*" multiple>
           </div>
-          <span class="preview-label" id="previewLabel">Image 1 of 0</span>
+          <div>
+            <div class="queue-header">
+              <span class="queue-count" id="videoQueueCount">0 videos</span>
+              <button class="queue-clear" id="clearVideoQueue">clear all</button>
+            </div>
+            <div class="video-queue-list" id="videoQueueList"></div>
+          </div>
         </div>
-        <div class="preview-wrap">
-          <div class="preview-placeholder" id="previewPlaceholder">
-            <div class="icon">🛡</div>
-            <div>Add images to begin</div>
+
+        <div class="panel video-panel">
+          <div class="panel-title video-title">02 — Watermark Type</div>
+          <div class="tabs" id="videoTabs">
+            <div class="tab active" data-vtab="text">TEXT</div>
+            <div class="tab" data-vtab="image">IMAGE</div>
           </div>
-          <canvas id="previewCanvas"></canvas>
+
+          <div class="mode-section active" id="vmode-text">
+            <div class="control-group">
+              <label class="ctrl-label">Watermark Text</label>
+              <input type="text" id="vWmText" value="© Protected">
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Font Size</label>
+              <div class="range-row"><input type="range" id="vFontSize" min="10" max="120" value="36"><span class="range-val" id="vFontSizeVal">36</span></div>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Color</label>
+              <div class="color-row"><input type="color" id="vTextColor" value="#ffffff"><input type="text" id="vTextColorHex" value="#ffffff"></div>
+              <div class="swatches" id="vSwatches">
+                <div class="swatch sel" style="background:#fff" data-c="#ffffff"></div>
+                <div class="swatch" style="background:#000" data-c="#000000"></div>
+                <div class="swatch" style="background:#ff3cac" data-c="#ff3cac"></div>
+                <div class="swatch" style="background:#00ffaa" data-c="#00ffaa"></div>
+                <div class="swatch" style="background:#ffd700" data-c="#ffd700"></div>
+                <div class="swatch" style="background:#ff4444" data-c="#ff4444"></div>
+                <div class="swatch" style="background:#7b2fff" data-c="#7b2fff"></div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Style</label>
+              <select id="vFontStyle"><option value="bold">Bold</option><option value="italic bold">Bold Italic</option><option value="normal">Normal</option><option value="italic">Italic</option></select>
+            </div>
+            <div class="control-group">
+              <label class="ctrl-label">Font</label>
+              <select id="vFontFamily"><option>Arial</option><option>Georgia</option><option>Courier New</option><option>Impact</option><option>Times New Roman</option><option>Verdana</option></select>
+            </div>
+          </div>
+
+          <div class="mode-section" id="vmode-image">
+            <div class="wm-dropzone" id="vWmDrop">
+              <div>🏷 Drop logo / watermark image</div>
+              <div style="margin-top:0.3rem;font-size:0.6rem">PNG with transparency works best</div>
+              <input type="file" id="vWmInput" accept="image/*">
+            </div>
+            <img id="vWmThumb" class="wm-thumb" style="display:none">
+            <div class="control-group" style="margin-top:0.9rem">
+              <label class="ctrl-label">Logo Size</label>
+              <div class="range-row"><input type="range" id="vWmSize" min="3" max="60" value="20"><span class="range-val" id="vWmSizeVal">20%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel video-panel">
+          <div class="panel-title video-title">03 — Placement</div>
+          <div class="control-group">
+            <label class="ctrl-label">Position</label>
+            <select id="vPosition"><option value="bottom-right">Bottom Right</option><option value="bottom-left">Bottom Left</option><option value="top-right">Top Right</option><option value="top-left">Top Left</option><option value="center">Center</option><option value="tile">Tile (full coverage)</option></select>
+          </div>
+          <div class="control-group">
+            <label class="ctrl-label">Opacity</label>
+            <div class="range-row"><input type="range" id="vOpacity" min="5" max="100" value="30"><span class="range-val" id="vOpacityVal">30%</span></div>
+          </div>
+          <div class="control-group">
+            <label class="ctrl-label">Rotation</label>
+            <div class="range-row"><input type="range" id="vRotation" min="-180" max="180" value="-30"><span class="range-val" id="vRotationVal">-30°</span></div>
+          </div>
+          <div class="control-group">
+            <label class="ctrl-label">Margin</label>
+            <div class="range-row"><input type="range" id="vMargin" min="0" max="100" value="20"><span class="range-val" id="vMarginVal">20px</span></div>
+          </div>
         </div>
       </div>
 
-      <div class="panel">
-        <div class="panel-title">Batch Export</div>
-        <div class="progress-wrap" id="progressWrap">
-          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-          <div class="progress-text" id="progressText">Processing...</div>
+      <!-- Video Preview + Export -->
+      <div>
+        <div class="panel video-panel">
+          <div class="panel-title video-title">Live Preview</div>
+          <div class="video-preview-label">⚡ Watermark overlay rendered in real-time</div>
+          <div class="preview-nav" id="videoPreviewNav">
+            <div style="display:flex;gap:0.4rem">
+              <button class="nav-btn" id="vPrevBtn">◀ Prev</button>
+              <button class="nav-btn" id="vNextBtn">Next ▶</button>
+            </div>
+            <span class="preview-label" id="videoPreviewLabel">Video 1 of 0</span>
+          </div>
+          <div class="video-preview-wrap">
+            <div id="videoPreviewPlaceholder" style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:0.75rem;">
+              <div style="font-size:2.5rem;opacity:0.2;margin-bottom:0.8rem">🎬</div>
+              <div>Add videos to begin</div>
+            </div>
+            <video id="videoPreview" controls style="display:none;max-width:100%;max-height:420px;border-radius:6px;"></video>
+            <canvas id="videoOverlayCanvas"></canvas>
+          </div>
         </div>
-        <div id="status"></div>
-        <button class="btn btn-primary" id="applyAllBtn" disabled>⚡ Apply Watermark to All Images</button>
-        <div id="dlAllWrap" style="display:none">
-          <button class="btn btn-secondary" id="dlAllBtn">⬇ Download All as ZIP</button>
-          <button class="btn btn-secondary" id="dlCurrentBtn">⬇ Download Current Image</button>
-        </div>
-        <button class="btn btn-danger" id="resetBtn" style="display:none">✕ Reset Everything</button>
-        <div style="margin-top:0.8rem;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted2);line-height:1.6">
-          All processing happens locally — no uploads to any server. Output saved as PNG.
+
+        <div class="panel video-panel">
+          <div class="panel-title video-title">Export Videos</div>
+          <div class="info-box-video">
+            ⚠ Video export encodes each frame with the watermark using the MediaRecorder API. Processing time depends on video length and browser. Output format: WebM.
+          </div>
+          <div class="progress-wrap" id="videoProgressWrap">
+            <div class="progress-track"><div class="progress-fill video-fill" id="videoProgressFill"></div></div>
+            <div class="progress-text" id="videoProgressText">Processing...</div>
+          </div>
+          <div id="videoStatus"></div>
+          <button class="btn btn-video" id="applyVideoBtn" disabled>🎬 Watermark Selected Video</button>
+          <button class="btn btn-video" id="applyAllVideosBtn" disabled style="opacity:0.7;margin-top:0">⚡ Watermark All Videos</button>
+          <div id="videoDlWrap" style="display:none;margin-top:0.5rem">
+            <button class="btn btn-secondary-v" id="dlCurrentVideoBtn">⬇ Download Current Video</button>
+            <button class="btn btn-secondary-v" id="dlAllVideosBtn" style="display:none">⬇ Download All as ZIP</button>
+          </div>
+          <button class="btn btn-danger" id="resetVideoBtn" style="display:none;margin-top:0.5rem">✕ Reset Videos</button>
+          <div style="margin-top:0.8rem;font-family:'Space Mono',monospace;font-size:0.62rem;color:var(--muted2);line-height:1.6">
+            All processing is local. Output is WebM (H.264-like via VP8). For best results use short clips under 2 min.
+          </div>
         </div>
       </div>
     </div>
@@ -392,6 +620,29 @@ input[type="color"] { -webkit-appearance: none; width: 32px; height: 28px; borde
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
+// ===================== SHARED UTILS =====================
+function loadImg(src) {
+  return new Promise((res,rej) => { const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; });
+}
+function fileToDataURL(file) {
+  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); });
+}
+function hexToRgb(hex) {
+  return { r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16) };
+}
+
+// ===================== MEDIA MODE SWITCH =====================
+function switchMediaMode(mode) {
+  document.querySelectorAll('.media-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('section-'+mode).classList.add('active');
+  document.querySelectorAll('.media-mode-btn').forEach(b=>{
+    b.classList.remove('active','video-active');
+  });
+  if(mode==='image') document.getElementById('switchImage').classList.add('active');
+  else { document.getElementById('switchVideo').classList.add('active','video-active'); }
+}
+
+// ===================== IMAGE WATERMARK =====================
 let imageQueue = [];
 let wmLogoImg = null, wmLogoBothImg = null;
 let currentPreviewIdx = 0;
@@ -399,7 +650,6 @@ let currentMode = 'text';
 let allProcessed = [];
 
 const previewCanvas = document.getElementById('previewCanvas');
-const pctx = previewCanvas.getContext('2d');
 const previewPlaceholder = document.getElementById('previewPlaceholder');
 const previewNav = document.getElementById('previewNav');
 const previewLabel = document.getElementById('previewLabel');
@@ -412,18 +662,6 @@ function showStatus(msg, dur=2500) {
   statusEl.textContent = msg;
   statusEl.classList.add('vis');
   if (dur) setTimeout(() => statusEl.classList.remove('vis'), dur);
-}
-
-function loadImg(src) {
-  return new Promise((res,rej) => { const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; });
-}
-
-function fileToDataURL(file) {
-  return new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); });
-}
-
-function hexToRgb(hex) {
-  return { r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16) };
 }
 
 function getSettings() {
@@ -535,7 +773,6 @@ function drawText(c2d, W, H, s, alpha, forceText, forceTile) {
   c2d.font=`${s.fontStyle} ${s.fontSize}px "${s.fontFamily}"`;
   c2d.textBaseline='middle';
   const tw=c2d.measureText(txt).width, th=s.fontSize*1.3;
-
   if(s.position==='tile'||forceTile){
     const gx=tw*1.8, gy=th*3; c2d.textAlign='center';
     for(let y=-gy;y<H+gy;y+=gy)
@@ -586,12 +823,9 @@ function applyWatermarkToCanvas(canvas, img, s) {
   canvas.width=W; canvas.height=H;
   const c=canvas.getContext('2d');
   c.drawImage(img,0,0,W,H);
-
   if(s.chkNoise){const id=c.getImageData(0,0,W,H);injectNoise(id,s.resistanceLevel);c.putImageData(id,0,0);}
-
   const blend=s.chkBlend?'overlay':'source-over';
   const dimmer=s.resistanceLevel==='max'?0.13:s.resistanceLevel==='high'?0.08:0.04;
-
   if(s.mode==='text'||s.mode==='both'){
     if(s.chkFreq){c.globalCompositeOperation=blend;drawText(c,W,H,s,dimmer,null,true);c.globalCompositeOperation='source-over';}
     c.globalCompositeOperation=blend;drawText(c,W,H,s,s.opacity);c.globalCompositeOperation='source-over';
@@ -628,32 +862,25 @@ async function batchApply() {
   applyAllBtn.disabled=true;
   document.getElementById('progressWrap').style.display='block';
   allProcessed=[];
-
   for(let i=0;i<imageQueue.length;i++){
     imageQueue[i].processed=false;
     const el=document.getElementById('queueGrid').children[i];
     if(el) el.classList.add('processing');
-
     document.getElementById('progressFill').style.width=`${(i/imageQueue.length)*100}%`;
     document.getElementById('progressText').textContent=`Processing ${i+1} of ${imageQueue.length}...`;
-
     await new Promise(res=>setTimeout(res,15));
-
     const off=document.createElement('canvas');
     applyWatermarkToCanvas(off,imageQueue[i].img,s);
     const dataURL=off.toDataURL('image/png');
     imageQueue[i].resultDataURL=dataURL;
     imageQueue[i].processed=true;
     allProcessed.push({name:imageQueue[i].name,dataURL});
-
     if(el){el.classList.remove('processing');el.classList.add('done');const t=el.querySelector('img');if(t)t.src=dataURL;}
     renderQueue();
   }
-
   document.getElementById('progressFill').style.width='100%';
   document.getElementById('progressText').textContent=`Done! ${imageQueue.length} images watermarked.`;
   setTimeout(()=>{document.getElementById('progressWrap').style.display='none';},2500);
-
   renderPreview(currentPreviewIdx);
   document.getElementById('dlAllWrap').style.display='block';
   document.getElementById('resetBtn').style.display='block';
@@ -711,13 +938,15 @@ setupDropzone('wmDropBoth','wmInputBoth',async(files)=>{
 });
 
 document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.mode-section').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');currentMode=t.dataset.tab;
-    document.getElementById('mode-'+currentMode).classList.add('active');
-    if(imageQueue.length)renderPreview(currentPreviewIdx);
-  });
+  if(t.dataset.tab){
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.tab[data-tab]').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('.mode-section[id^="mode-"]').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');currentMode=t.dataset.tab;
+      document.getElementById('mode-'+currentMode).classList.add('active');
+      if(imageQueue.length)renderPreview(currentPreviewIdx);
+    });
+  }
 });
 
 prevBtn.addEventListener('click',()=>{if(currentPreviewIdx>0){currentPreviewIdx--;renderPreview(currentPreviewIdx);}});
@@ -731,7 +960,7 @@ ch.addEventListener('input',()=>{if(/^#[0-9a-fA-F]{6}$/.test(ch.value)){cp.value
 document.querySelectorAll('.swatch').forEach(s=>{
   s.addEventListener('click',()=>{
     cp.value=s.dataset.c;ch.value=s.dataset.c;
-    document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('sel'));s.classList.add('sel');
+    document.querySelectorAll('#mode-text .swatch').forEach(x=>x.classList.remove('sel'));s.classList.add('sel');
     if(imageQueue.length)renderPreview(currentPreviewIdx);
   });
 });
@@ -752,6 +981,416 @@ Object.keys(rangeMap).forEach(id=>{
 });
 document.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
   cb.addEventListener('change',()=>{if(imageQueue.length)renderPreview(currentPreviewIdx);});
+});
+
+// ===================== VIDEO WATERMARK =====================
+let videoQueue = [];
+let vWmLogoImg = null;
+let currentVideoMode = 'text';
+let currentVideoIdx = 0;
+let videoResults = [];
+let isProcessingVideo = false;
+let overlayAnimId = null;
+
+const videoEl = document.getElementById('videoPreview');
+const overlayCanvas = document.getElementById('videoOverlayCanvas');
+const overlayCtx = overlayCanvas.getContext('2d');
+const videoStatusEl = document.getElementById('videoStatus');
+const applyVideoBtn = document.getElementById('applyVideoBtn');
+const applyAllVideosBtn = document.getElementById('applyAllVideosBtn');
+const videoPreviewNav = document.getElementById('videoPreviewNav');
+
+function showVideoStatus(msg, dur=3000) {
+  videoStatusEl.textContent = msg;
+  videoStatusEl.classList.add('vis');
+  if (dur) setTimeout(() => videoStatusEl.classList.remove('vis'), dur);
+}
+
+function getVideoSettings() {
+  return {
+    mode: currentVideoMode,
+    wmText: document.getElementById('vWmText').value || '© Protected',
+    fontSize: +document.getElementById('vFontSize').value,
+    textColor: document.getElementById('vTextColor').value,
+    fontStyle: document.getElementById('vFontStyle').value,
+    fontFamily: document.getElementById('vFontFamily').value,
+    wmSize: +document.getElementById('vWmSize').value / 100,
+    position: document.getElementById('vPosition').value,
+    opacity: +document.getElementById('vOpacity').value / 100,
+    rotation: +document.getElementById('vRotation').value * Math.PI / 180,
+    margin: +document.getElementById('vMargin').value,
+  };
+}
+
+function drawVideoWatermark(ctx, W, H, s) {
+  ctx.clearRect(0, 0, W, H);
+  if (s.mode === 'text') {
+    const rgb = hexToRgb(s.textColor);
+    ctx.save();
+    ctx.globalAlpha = s.opacity;
+    ctx.fillStyle = `rgba(${rgb.r},${rgb.g},${rgb.b},1)`;
+    ctx.font = `${s.fontStyle} ${s.fontSize}px "${s.fontFamily}"`;
+    ctx.textBaseline = 'middle';
+    const tw = ctx.measureText(s.wmText).width, th = s.fontSize * 1.3;
+    if (s.position === 'tile') {
+      const gx = tw * 1.8, gy = th * 3;
+      ctx.textAlign = 'center';
+      for (let y = -gy; y < H + gy; y += gy)
+        for (let x = -gx; x < W + gx * 2; x += gx) {
+          ctx.save(); ctx.translate(x, y); ctx.rotate(s.rotation); ctx.fillText(s.wmText, 0, 0); ctx.restore();
+        }
+    } else {
+      let x, y; ctx.textAlign = 'left';
+      switch (s.position) {
+        case 'bottom-right': x = W - tw - s.margin; y = H - th / 2 - s.margin; break;
+        case 'bottom-left': x = s.margin; y = H - th / 2 - s.margin; break;
+        case 'top-right': x = W - tw - s.margin; y = th / 2 + s.margin; break;
+        case 'top-left': x = s.margin; y = th / 2 + s.margin; break;
+        case 'center': x = (W - tw) / 2; y = H / 2; break;
+        default: x = W - tw - s.margin; y = H - th / 2 - s.margin;
+      }
+      ctx.save(); ctx.translate(x + tw / 2, y); ctx.rotate(s.rotation); ctx.fillText(s.wmText, -tw / 2, 0); ctx.restore();
+    }
+    ctx.restore();
+  } else if (s.mode === 'image' && vWmLogoImg) {
+    const wmW = W * s.wmSize, wmH = vWmLogoImg.height * (wmW / vWmLogoImg.width);
+    ctx.save(); ctx.globalAlpha = s.opacity;
+    if (s.position === 'tile') {
+      const gx = wmW * 1.5, gy = wmH * 2.2;
+      for (let ty = -gy; ty < H + gy; ty += gy)
+        for (let tx = -gx; tx < W + gx * 2; tx += gx) {
+          ctx.save(); ctx.translate(tx + wmW / 2, ty + wmH / 2); ctx.rotate(s.rotation);
+          ctx.drawImage(vWmLogoImg, -wmW / 2, -wmH / 2, wmW, wmH); ctx.restore();
+        }
+    } else {
+      let x, y;
+      switch (s.position) {
+        case 'bottom-right': x = W - wmW - s.margin; y = H - wmH - s.margin; break;
+        case 'bottom-left': x = s.margin; y = H - wmH - s.margin; break;
+        case 'top-right': x = W - wmW - s.margin; y = s.margin; break;
+        case 'top-left': x = s.margin; y = s.margin; break;
+        case 'center': x = (W - wmW) / 2; y = (H - wmH) / 2; break;
+        default: x = W - wmW - s.margin; y = H - wmH - s.margin;
+      }
+      ctx.translate(x + wmW / 2, y + wmH / 2); ctx.rotate(s.rotation);
+      ctx.drawImage(vWmLogoImg, -wmW / 2, -wmH / 2, wmW, wmH);
+    }
+    ctx.restore();
+  }
+}
+
+function startOverlayLoop() {
+  if (overlayAnimId) cancelAnimationFrame(overlayAnimId);
+  function loop() {
+    if (videoEl.style.display === 'none') return;
+    const rect = videoEl.getBoundingClientRect();
+    const vRect = videoEl.parentElement.getBoundingClientRect();
+    overlayCanvas.width = videoEl.offsetWidth;
+    overlayCanvas.height = videoEl.offsetHeight;
+    overlayCanvas.style.width = videoEl.offsetWidth + 'px';
+    overlayCanvas.style.height = videoEl.offsetHeight + 'px';
+    overlayCanvas.style.left = (videoEl.offsetLeft) + 'px';
+    overlayCanvas.style.top = (videoEl.offsetTop) + 'px';
+    const s = getVideoSettings();
+    drawVideoWatermark(overlayCtx, overlayCanvas.width, overlayCanvas.height, s);
+    overlayAnimId = requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+function loadVideoPreview(idx) {
+  if (!videoQueue[idx]) return;
+  const item = videoQueue[idx];
+  videoEl.src = item.objectURL || URL.createObjectURL(item.file);
+  if (!item.objectURL) item.objectURL = videoEl.src;
+  videoEl.style.display = 'block';
+  overlayCanvas.style.display = 'block';
+  document.getElementById('videoPreviewPlaceholder').style.display = 'none';
+  videoEl.onloadedmetadata = () => { startOverlayLoop(); };
+  renderVideoQueue();
+  updateVideoNavBtns();
+  applyVideoBtn.disabled = false;
+  applyAllVideosBtn.disabled = false;
+}
+
+function renderVideoQueue() {
+  const list = document.getElementById('videoQueueList');
+  list.innerHTML = '';
+  document.getElementById('videoQueueCount').textContent = `${videoQueue.length} video${videoQueue.length !== 1 ? 's' : ''}`;
+  videoQueue.forEach((item, i) => {
+    const el = document.createElement('div');
+    el.className = 'video-queue-item' + (i === currentVideoIdx ? ' selected-preview' : '') + (item.done ? ' done' : '') + (item.processing ? ' processing' : '');
+    const statusText = item.done ? '<span class="vq-status done">✓ done</span>' : item.processing ? '<span class="vq-status processing">⚙ processing...</span>' : '<span class="vq-status ready">ready</span>';
+    el.innerHTML = `<div class="vq-icon">🎬</div><div class="vq-info"><div class="vq-name">${item.name}</div><div class="vq-meta">${(item.file.size/1024/1024).toFixed(1)} MB</div>${statusText}</div><button class="vq-remove">✕</button>`;
+    el.addEventListener('click', (e) => { if(e.target.classList.contains('vq-remove')) return; currentVideoIdx = i; loadVideoPreview(i); });
+    el.querySelector('.vq-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (item.objectURL) URL.revokeObjectURL(item.objectURL);
+      videoQueue.splice(i, 1);
+      if (currentVideoIdx >= videoQueue.length) currentVideoIdx = Math.max(0, videoQueue.length - 1);
+      renderVideoQueue();
+      if (videoQueue.length) loadVideoPreview(currentVideoIdx);
+      else clearVideoPreview();
+    });
+    list.appendChild(el);
+  });
+  updateVideoNavBtns();
+}
+
+function clearVideoPreview() {
+  videoEl.style.display = 'none';
+  overlayCanvas.style.display = 'none';
+  document.getElementById('videoPreviewPlaceholder').style.display = 'block';
+  videoPreviewNav.classList.remove('show');
+  applyVideoBtn.disabled = true;
+  applyAllVideosBtn.disabled = true;
+  if (overlayAnimId) { cancelAnimationFrame(overlayAnimId); overlayAnimId = null; }
+}
+
+function updateVideoNavBtns() {
+  document.getElementById('vPrevBtn').disabled = currentVideoIdx <= 0;
+  document.getElementById('vNextBtn').disabled = currentVideoIdx >= videoQueue.length - 1;
+  if (videoQueue.length > 0) {
+    document.getElementById('videoPreviewLabel').textContent = `Video ${currentVideoIdx + 1} of ${videoQueue.length}`;
+    videoPreviewNav.classList.add('show');
+  }
+}
+
+function addVideoFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('video/'));
+  if (!arr.length) { showVideoStatus('No valid video files found'); return; }
+  arr.forEach(file => {
+    videoQueue.push({ file, name: file.name, done: false, processing: false, resultBlob: null, objectURL: null });
+  });
+  renderVideoQueue();
+  currentVideoIdx = Math.max(0, videoQueue.length - arr.length);
+  loadVideoPreview(currentVideoIdx);
+  showVideoStatus(`${arr.length} video${arr.length > 1 ? 's' : ''} added · ${videoQueue.length} total`);
+}
+
+// Video watermark encoding using MediaRecorder
+async function processVideo(item, onProgress) {
+  return new Promise(async (resolve, reject) => {
+    const video = document.createElement('video');
+    video.src = item.objectURL || URL.createObjectURL(item.file);
+    if (!item.objectURL) item.objectURL = video.src;
+    video.muted = true;
+    video.preload = 'auto';
+
+    await new Promise(r => { video.onloadedmetadata = r; });
+
+    const W = video.videoWidth, H = video.videoHeight;
+    const fps = 30;
+    const duration = video.duration;
+
+    const offscreen = document.createElement('canvas');
+    offscreen.width = W; offscreen.height = H;
+    const ctx = offscreen.getContext('2d');
+
+    const stream = offscreen.captureStream(fps);
+
+    // Try to add audio track
+    let audioCtx, audioDest;
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaElementSource(video);
+      audioDest = audioCtx.createMediaStreamDestination();
+      source.connect(audioDest);
+      source.connect(audioCtx.destination);
+      audioDest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+    } catch(e) { /* audio not available */ }
+
+    const chunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 4000000 });
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      resolve(blob);
+    };
+
+    const s = getVideoSettings();
+    let frameCount = 0;
+    const totalFrames = Math.ceil(duration * fps);
+
+    recorder.start(100);
+    video.currentTime = 0;
+    await new Promise(r => { video.onseeked = r; });
+    video.play();
+
+    function drawFrame() {
+      if (video.ended || video.currentTime >= duration) {
+        recorder.stop();
+        if (audioCtx) audioCtx.close();
+        return;
+      }
+      ctx.drawImage(video, 0, 0, W, H);
+      drawVideoWatermark(ctx, W, H, s);
+      frameCount++;
+      if (onProgress) onProgress(Math.min(1, video.currentTime / duration));
+      requestAnimationFrame(drawFrame);
+    }
+
+    video.onplay = () => drawFrame();
+    video.onerror = reject;
+  });
+}
+
+async function watermarkSingleVideo(idx) {
+  if (isProcessingVideo) return;
+  isProcessingVideo = true;
+  const item = videoQueue[idx];
+  if (!item) { isProcessingVideo = false; return; }
+
+  item.processing = true;
+  item.done = false;
+  renderVideoQueue();
+  applyVideoBtn.disabled = true;
+  applyAllVideosBtn.disabled = true;
+  document.getElementById('videoProgressWrap').style.display = 'block';
+  document.getElementById('videoProgressFill').style.width = '0%';
+  document.getElementById('videoProgressText').textContent = `Encoding "${item.name}"...`;
+
+  try {
+    const blob = await processVideo(item, (pct) => {
+      document.getElementById('videoProgressFill').style.width = (pct * 100) + '%';
+      document.getElementById('videoProgressText').textContent = `Encoding: ${Math.round(pct*100)}%`;
+    });
+    item.resultBlob = blob;
+    item.done = true;
+    item.processing = false;
+    renderVideoQueue();
+    document.getElementById('videoProgressFill').style.width = '100%';
+    document.getElementById('videoProgressText').textContent = 'Done!';
+    setTimeout(() => { document.getElementById('videoProgressWrap').style.display = 'none'; }, 2000);
+    document.getElementById('videoDlWrap').style.display = 'block';
+    document.getElementById('resetVideoBtn').style.display = 'block';
+    showVideoStatus(`✓ "${item.name}" watermarked!`);
+  } catch (err) {
+    item.processing = false;
+    renderVideoQueue();
+    showVideoStatus('Error encoding video: ' + err.message);
+    document.getElementById('videoProgressWrap').style.display = 'none';
+  }
+  applyVideoBtn.disabled = false;
+  applyAllVideosBtn.disabled = false;
+  isProcessingVideo = false;
+}
+
+async function watermarkAllVideos() {
+  if (isProcessingVideo) return;
+  for (let i = 0; i < videoQueue.length; i++) {
+    currentVideoIdx = i;
+    await watermarkSingleVideo(i);
+  }
+  // Show zip button if more than one
+  const doneItems = videoQueue.filter(v => v.resultBlob);
+  if (doneItems.length > 1) document.getElementById('dlAllVideosBtn').style.display = 'block';
+  showVideoStatus(`✓ All ${videoQueue.length} videos watermarked!`);
+}
+
+applyVideoBtn.addEventListener('click', () => watermarkSingleVideo(currentVideoIdx));
+applyAllVideosBtn.addEventListener('click', watermarkAllVideos);
+
+document.getElementById('dlCurrentVideoBtn').addEventListener('click', () => {
+  const item = videoQueue[currentVideoIdx];
+  if (!item?.resultBlob) { showVideoStatus('Process video first'); return; }
+  const url = URL.createObjectURL(item.resultBlob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = 'watershield-' + item.name.replace(/\.[^.]+$/, '') + '.webm'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('dlAllVideosBtn').addEventListener('click', async () => {
+  const doneItems = videoQueue.filter(v => v.resultBlob);
+  if (!doneItems.length) return;
+  showVideoStatus('Creating ZIP...', 0);
+  const zip = new JSZip();
+  doneItems.forEach((item, i) => {
+    zip.file(`watershield-${i+1}-${item.name.replace(/\.[^.]+$/, '')}.webm`, item.resultBlob);
+  });
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'watershield-videos.zip'; a.click();
+  URL.revokeObjectURL(url);
+  showVideoStatus('ZIP downloaded ✓');
+});
+
+document.getElementById('resetVideoBtn').addEventListener('click', () => {
+  videoQueue.forEach(v => { if (v.objectURL) URL.revokeObjectURL(v.objectURL); });
+  videoQueue = []; videoResults = [];
+  renderVideoQueue(); clearVideoPreview();
+  document.getElementById('videoDlWrap').style.display = 'none';
+  document.getElementById('resetVideoBtn').style.display = 'none';
+  document.getElementById('dlAllVideosBtn').style.display = 'none';
+  showVideoStatus('Reset complete');
+});
+
+document.getElementById('vPrevBtn').addEventListener('click', () => {
+  if (currentVideoIdx > 0) { currentVideoIdx--; loadVideoPreview(currentVideoIdx); }
+});
+document.getElementById('vNextBtn').addEventListener('click', () => {
+  if (currentVideoIdx < videoQueue.length - 1) { currentVideoIdx++; loadVideoPreview(currentVideoIdx); }
+});
+
+document.getElementById('clearVideoQueue').addEventListener('click', () => {
+  videoQueue.forEach(v => { if (v.objectURL) URL.revokeObjectURL(v.objectURL); });
+  videoQueue = []; renderVideoQueue(); clearVideoPreview();
+});
+
+setupDropzone('videoDrop', 'videoInput', addVideoFiles);
+
+// Video logo watermark
+const vWmDrop = document.getElementById('vWmDrop');
+const vWmInput = document.getElementById('vWmInput');
+vWmDrop.addEventListener('click', () => vWmInput.click());
+vWmDrop.addEventListener('dragover', e => { e.preventDefault(); vWmDrop.style.borderColor = 'var(--accent3)'; });
+vWmDrop.addEventListener('dragleave', () => { vWmDrop.style.borderColor = ''; });
+vWmDrop.addEventListener('drop', async e => {
+  e.preventDefault(); vWmDrop.style.borderColor = '';
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  const url = await fileToDataURL(f); vWmLogoImg = await loadImg(url);
+  document.getElementById('vWmThumb').src = url; document.getElementById('vWmThumb').style.display = 'block';
+  showVideoStatus('Logo loaded ✓');
+});
+vWmInput.addEventListener('change', async () => {
+  const f = vWmInput.files[0]; if (!f) return;
+  const url = await fileToDataURL(f); vWmLogoImg = await loadImg(url);
+  document.getElementById('vWmThumb').src = url; document.getElementById('vWmThumb').style.display = 'block';
+  showVideoStatus('Logo loaded ✓');
+  vWmInput.value = '';
+});
+
+// Video tab switcher
+document.querySelectorAll('[data-vtab]').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('[data-vtab]').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.mode-section[id^="vmode-"]').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentVideoMode = t.dataset.vtab;
+    document.getElementById('vmode-' + currentVideoMode).classList.add('active');
+  });
+});
+
+// Video color picker
+const vcp = document.getElementById('vTextColor'), vch = document.getElementById('vTextColorHex');
+vcp.addEventListener('input', () => { vch.value = vcp.value; });
+vch.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(vch.value)) vcp.value = vch.value; });
+document.querySelectorAll('#vSwatches .swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    vcp.value = s.dataset.c; vch.value = s.dataset.c;
+    document.querySelectorAll('#vSwatches .swatch').forEach(x => x.classList.remove('sel'));
+    s.classList.add('sel');
+  });
+});
+
+// Video range labels
+const vRangeMap = { vFontSize: 'vFontSizeVal', vWmSize: 'vWmSizeVal', vOpacity: 'vOpacityVal', vRotation: 'vRotationVal', vMargin: 'vMarginVal' };
+const vSuffixes = { vFontSize: '', vWmSize: '%', vOpacity: '%', vRotation: '°', vMargin: 'px' };
+Object.keys(vRangeMap).forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById(vRangeMap[id]).textContent = document.getElementById(id).value + vSuffixes[id];
+  });
 });
 </script>
 </body>
