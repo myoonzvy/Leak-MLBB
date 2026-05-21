@@ -1026,7 +1026,7 @@ function getVideoSettings() {
 }
 
 function drawVideoWatermark(ctx, W, H, s) {
-  ctx.clearRect(0, 0, W, H);
+  // Do NOT clearRect — video frame already drawn by caller
   const blendOp = s.chkBlend ? 'overlay' : 'source-over';
   if (s.mode === 'text') {
     const rgb = hexToRgb(s.textColor);
@@ -1084,6 +1084,9 @@ function drawVideoWatermark(ctx, W, H, s) {
     }
     ctx.restore();
   }
+  // Reset so next frame's ctx.drawImage(video) is always normal
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
 }
 
 function startOverlayLoop() {
@@ -1099,6 +1102,7 @@ function startOverlayLoop() {
     overlayCanvas.style.left = (videoEl.offsetLeft) + 'px';
     overlayCanvas.style.top = (videoEl.offsetTop) + 'px';
     const s = getVideoSettings();
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     drawVideoWatermark(overlayCtx, overlayCanvas.width, overlayCanvas.height, s);
     overlayAnimId = requestAnimationFrame(loop);
   }
